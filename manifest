@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1
+apiversion: 2
+description: My module
+author: Your Name
+license: Specify your license
+copyright: Copyright (c) 2012 by Your Company
+
+
+# these should not be edited
+name: tesseract
+moduleid: rmtheis.tesseract.tesstwo
+guid: 52723fdd-ca18-4868-9251-80084c7c700b
+platform: android
+minsdk: 2.1.0.GA

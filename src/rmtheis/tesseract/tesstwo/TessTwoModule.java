@@ -138,6 +138,9 @@ public class TessTwoModule extends KrollModule
  
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
+        
+        Log.d(LCAT, "Setting parent directory for tessdata as DATAPATH".replace("DATAPATH", DATA_PATH));
+        
         baseApi.init(DATA_PATH, language);
         baseApi.setImage(bitmap);
         //baseApi.get

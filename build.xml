@@ -1,10 +1,18 @@
-<project name="tesseract" default="dist">
+<project name="ocrdroid" default="dist">
 	<description>
-		Ant build script for Titanium Android module tesseract
+		Ant build script for Titanium Android module ocrdroid
 	</description>
 
 	<property name="ti.module.root" location="${basedir}"/>
 	<property file="build.properties" />
+	
+	<target name="post.jar">
+	  <copy todir="${libs}">
+	    <fileset dir="libs.import">
+	      <include name="**/*.so"/>
+	    </fileset>
+	  </copy>
+	</target>
 
 	<import file="${titanium.platform}/../module/android/build.xml"/>
 </project>

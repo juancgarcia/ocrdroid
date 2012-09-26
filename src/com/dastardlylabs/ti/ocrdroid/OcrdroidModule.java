@@ -6,9 +6,12 @@
  * Please see the LICENSE included with this distribution for details.
  *
  */
-package rmtheis.tesseract.tesstwo;
+package com.dastardlylabs.ti.ocrdroid;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.appcelerator.kroll.KrollModule;
@@ -16,32 +19,33 @@ import org.appcelerator.kroll.annotations.Kroll;
 
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
-import org.appcelerator.kroll.common.TiConfig;
+import org.json.JSONArray;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 
+import com.dastardlylabs.android.util.StorageHelper;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 
-@Kroll.module(name="Tesseract", id="rmtheis.tesseract.tesstwo")
-public class TessTwoModule extends KrollModule
-{
+@Kroll.module(name="Ocrdroid", id="com.dastardlylabs.ti.ocrdroid")
+public class OcrdroidModule extends KrollModule {
+
 
 	// Standard Debugging variables
 	private static final String LCAT = "TesseractModule";
-	private static final boolean DBG = TiConfig.LOGD;
-	
-	private static final String DATA_PATH = "file:///android_asset/";
-	
-	private String exampleProperty = "";
+	private static Context appContext;
+	private static StorageHelper storageHelper;
+	//private static final boolean DBG = TiConfig.LOGD;
+	//private static boolean supportsExternalStorage;	
 
 	// You can define constants with @Kroll.constant, for example:
 	// @Kroll.constant public static final String EXTERNAL_NAME = value;
 	
-	public TessTwoModule()
+	public OcrdroidModule()
 	{
 		super();
 	}
@@ -49,45 +53,80 @@ public class TessTwoModule extends KrollModule
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app)
 	{
+		appContext = app.getApplicationContext();
+		storageHelper = new StorageHelper(appContext);
+		
 		Log.d(LCAT, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
+		if(!tessDataExists()){
+			unpackTessData();
+		}
+	}
+	
+	private static File getTessDataDirectory(){
+		return storageHelper.getStorageDirectory();
+	}
+	
+	private static void unpackTessData(){
+		
+		String	assetName = "assets.zip",
+				assetPath,
+				outputDir = getTessDataDirectory().getAbsolutePath();
+		File	assetTmpFile;
+		
+		Log.i(LCAT, "Extracting " + assetName);
+		assetTmpFile = storageHelper.copyAssetToTmp(assetName);
+		assetPath = assetTmpFile.getAbsolutePath();
+
+		try {
+			Log.d(LCAT, "assetFile Path: " + assetPath);
+			com.dastardlylabs.android.util.ZipHelper.extract(
+					assetPath,
+					outputDir);
+		} catch (IOException e) {
+			Log.e(LCAT, "Asset unpacking failed: " + e.getLocalizedMessage());
+		} finally {
+			if(assetTmpFile != null && assetTmpFile.exists())
+				assetTmpFile.delete();
+		}
+		
+	}
+	
+	private static boolean tessDataExists(){
+		ArrayList<String> dataFiles = new ArrayList<String>();
+		Collections.addAll(dataFiles, getTessDataDirectory().list());
+		
+		JSONArray fred = new JSONArray(dataFiles);
+		
+		Log.d(LCAT, "DataFiles list: " + fred.toString());
+		
+		return dataFiles.contains((Object) "tessdata");
 	}
 
-	// Methods
-	@Kroll.method
-	public String example()
-	{
-		Log.d(LCAT, "example called");
-		return "exampleProperty: PLACEHOLDER".replaceAll("PLACEHOLDER", exampleProperty);
-	}
-	
-	// Properties
-	@Kroll.getProperty
-	public String getExampleProp()
-	{
-		Log.d(LCAT, "get example property");
-		return exampleProperty;
-	}
-	
-	
-	@Kroll.setProperty
-	public void setExampleProp(String value) {
-		Log.d(LCAT, "set example property: " + value);
-		exampleProperty = value;
-	}
-
-	@Kroll.method
+	@Kroll.method @SuppressWarnings("rawtypes")
 	public String ocr(HashMap _config)
 	{
 		assert(_config != null);
-		String imagePath = (String) _config.get("path");
-		String language = (String) _config.get("lang");
+		String	dataParentPath = getTessDataDirectory().getAbsolutePath(), //= (String) _config.get("dataParent"),
+				imagePath = StorageHelper.stripFileUri((String) _config.get("image")),
+				language = (String) _config.get("lang");
 		
-		Log.d(LCAT, "ocr called");
+		try{
+			if(!tessDataExists())
+				unpackTessData();
+		} catch(Exception e) {			
+			// catch failure and bubble up failure message and options
+			// else continue.
+		}
 		
+		Log.d(LCAT, "ocr called");        
+        Log.d(LCAT, "Setting parent directory for tessdata as DATAPATH".replace("DATAPATH", dataParentPath /*DATA_PATH*/));
+        
 		BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 2;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
+        //bitmap.getConfig()
  
         try {
             ExifInterface exif = new ExifInterface(imagePath);
@@ -138,10 +177,7 @@ public class TessTwoModule extends KrollModule
  
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
-        
-        Log.d(LCAT, "Setting parent directory for tessdata as DATAPATH".replace("DATAPATH", DATA_PATH));
-        
-        baseApi.init(DATA_PATH, language);
+        baseApi.init(dataParentPath /*DATA_PATH*/, language);
         baseApi.setImage(bitmap);
         //baseApi.get
         String recognizedText = baseApi.getUTF8Text();
@@ -156,7 +192,6 @@ public class TessTwoModule extends KrollModule
 		
 		return recognizedText.trim();
 	}
-
 
 }
 

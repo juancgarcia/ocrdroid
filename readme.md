@@ -26,4 +26,4 @@ Clone or copy tess-two, then you must decide between two options to proceed: (bo
 >Add the tess-two.jar to **ocrdroid**'s classpath (I actually can't get the build to work adding the jar this way. It always fails in "cannot find symbol" on TessBaseAPI even though Titanium Studio shows no problems. My workaround is to copy the tess-two java source into **ocrdroid** and let Titanium compile it as part of **ocrdroid** )
 
 ### Common Setup ###
-Next create an assets folder and include a zip file named "tess.zip" (this is hardcoded in OcrdroidModule.unpackTessData) containing the trained data filed inside of a tessdata folder as outlined in tess-two's readme 
+Next create an assets folder and include a zip file named "tess.zip" (this is hardcoded in OcrdroidModule.unpackTessData) containing the trained data files inside of a tessdata folder as outlined in tess-two's readme 

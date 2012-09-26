@@ -9,6 +9,5 @@
 	<classpathentry kind="lib" path="../../bin/TiSDKHome/mobilesdk/win32/2.1.0.GA/android/js.jar"/>
 	<classpathentry kind="lib" path="../../bin/TiSDKHome/mobilesdk/win32/2.1.0.GA/android/kroll-common.jar"/>
 	<classpathentry kind="lib" path="../../bin/TiSDKHome/mobilesdk/win32/2.1.0.GA/android/kroll-apt.jar"/>
-	<classpathentry kind="lib" path="lib/tessmod.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

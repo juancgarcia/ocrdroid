@@ -13,8 +13,8 @@ win.add(label);
 win.open();
 
 // TODO: write your module tests here
-var tesstwo = require('rmtheis.tesstwo');
-Ti.API.info("module is => " + tesstwo);
+var ocrdroid = require('com.dastardlylabs.ti.ocrdroid');
+Ti.API.info("module is => " + ocrdroid);
 
 var ocrText = Ti.UI.createLabel({
 	color : '#000000',
@@ -33,12 +33,18 @@ if (Ti.Platform.name == "android") {
 	});
 	win.add(cameraButton);
 
+	var getTextInImage = function(_TiFilePath){		
+		var nativeFilePath = Ti.Filesystem.getFile(_TiFilePath).nativePath;
+		
+		var foundText = tesstwo.ocr( {image:nativeFilePath,lang:'eng'} );
+		ocrText.setText(foundText);
+	};
+
+
 	var cameraConfig = {
 		saveToPhotoGallery : true,
-		success : function(event) {
-			//ocrText.setText(event.media.nativePath);
-			var foundText = tesstwo.ocr( {path:event.media.nativePath,lang:'eng'} );
-			ocrText.setText(foundText);
+		success : function(event) {			
+			getTextInImage(event.media.nativePath);
 		},
 		cancel : function() {
 		},

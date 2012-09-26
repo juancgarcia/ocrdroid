@@ -68,7 +68,7 @@ public class OcrdroidModule extends KrollModule {
 	
 	private static void unpackTessData(){
 		
-		String	assetName = "assets.zip",
+		String	assetName = "tess.zip",
 				assetPath,
 				outputDir = getTessDataDirectory().getAbsolutePath();
 		File	assetTmpFile;
